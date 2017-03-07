@@ -20,23 +20,23 @@ rtmp_nginx_module_url=https://github.com/arut/nginx-rtmp-module.git
 
 temp_dir=$(mktemp -d /tmp/nginx.XXXXXXXXXX)
 
-echo "Serving files from /tmp on $PORT"
+echo "------> Serving files from /tmp on $PORT"
 cd /tmp
 python -m SimpleHTTPServer $PORT &
 
 cd $temp_dir
-echo "Temp dir: $temp_dir"
+echo "------> Temp dir: $temp_dir"
 
-echo "Downloading $nginx_tarball_url"
+echo "------> Downloading nginx v$NGINX_VERSION url:$nginx_tarball_url"
 curl -L $nginx_tarball_url | tar xzv
 
-echo "Downloading $pcre_tarball_url"
+echo "------> Downloading pcre v$PCRE_VERSION url:$pcre_tarball_url"
 (cd nginx-${NGINX_VERSION} && curl -L $pcre_tarball_url | tar xvj )
 
-echo "Downloading $headers_more_nginx_module_url"
+echo "------> Downloading heagers_more v$HEADERS_MORE_VERSION url:$headers_more_nginx_module_url"
 (cd nginx-${NGINX_VERSION} && curl -L $headers_more_nginx_module_url | tar xvz )
 
-echo "Downloading $rtmp_nginx_modile_url"
+echo "------> Downloading $rtmp_nginx_modile_url"
 git clone $rtmp_nginx_module_url
 
 (
