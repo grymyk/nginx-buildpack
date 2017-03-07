@@ -1,0 +1,121 @@
+#user  nobody;
+worker_processes <%= ENV['NGINX_WORKERS'] || 4 %>;
+
+events {
+    use epoll;
+    accept_mutex on;
+    worker_connections  1024;
+}
+
+http {
+    gzip on;
+    gzip_comp_level 2;
+    gzip_min_length 512;
+
+    server_tokens off;
+
+    log_format l2met 'measure#nginx.service=$request_time request_id=$http_x_request_id';
+    access_log logs/nginx/access.log l2met;
+    error_log logs/nginx/error.log;
+
+    include mime.types;
+    default_type application/octet-stream;
+    sendfile off;
+    
+    tcp_nopush on;
+    #aio on;
+    directio 512;
+    default_type  application/octet-stream;
+    keepalive_timeout  65;
+
+    client_body_timeout 5;
+
+    upstream app_server {
+        server unix:/tmp/nginx.socket fail_timeout=0;
+    }
+
+    server {
+        listen <%= ENV["PORT"] %>;
+        server_name _;
+        #server_name potik.herokuapp.com;
+
+        location / {
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header Host $http_host;
+            proxy_redirect off;
+            proxy_pass http://app_server;
+        }
+        
+        # rtmp stat
+        location /stat {
+            rtmp_stat all;
+            rtmp_stat_stylesheet stat.xsl;
+        }
+        
+        location /stat.xsl {
+            # you can move stat.xsl to a different location
+            root /usr/build/nginx-rtmp-module;
+        }
+
+        location /hls {
+            root /tmp/;
+
+            add_header Cache-Control no-cache;
+
+            add_header 'Access-Control-Allow-Origin' '*' always;
+            add_header 'Access-Control-Expose-Headers' 'Content-Length,Content-Range';
+            add_header 'Access-Control-Allow-Headers' 'Range';
+            
+            if ($request_method = 'OPTIONS') {
+                add_header 'Access-Control-Allow-Origin' '*';
+                add_header 'Access-Control-Allow-Headers' 'Range';
+                add_header 'Access-Control-Max-Age' 1728000;
+                add_header 'Content-Type' 'text/plain charset=UTF-8';
+                add_header 'Content-Length' 0;
+                
+                return 204;
+            }
+
+            types {
+                application/vnd.apple.mpegurl m3u8;
+                video/mp2t ts;
+            }
+        }
+
+        error_page   500 502 503 504  /50x.html;
+        
+        location = /50x.html {
+            root   html;
+        }
+    }
+}
+
+rtmp {
+    server {
+        listen 1935;
+        #ping 30s;
+        #notify_method get;
+        chunk_size 4000;
+
+        #set $ip $remote_addr;
+
+        application myapp {
+            live on;
+           
+            exec_static /usr/bin/ffmpeg -rtsp_transport tcp -i rtsp://mpv.cdn3.bigCDN.com:554/bigCDN/definst/mp4:bigbuckbunnyiphone_400.mp4 -vcodec copy -f flv -r 25 -s 1920x1080 -an "rtmp://potik.herokuapp.com/myapp/camera";
+
+           #exec_static /usr/bin/ffmpeg -rtsp_transport tcp -i rtsp://mpv.cdn3.bigCDN.com:554/bigCDN/definst/mp4:bigbuckbunnyiphone_400.mp4 -vcodec copy -f flv -r 25 -s 1920x1080 -an "rtmp://192.168.1.206/myapp/camera";
+           
+           #exec_static /usr/bin/ffmpeg -rtsp_transport tcp -i rtsp://mpv.cdn3.bigCDN.com:554/bigCDN/definst/mp4:bigbuckbunnyiphone_400.mp4 -vcodec copy -f flv -r 25 -s 1920x1080 -an "rtmp://localhost/myapp/camera";
+            #exec ffmpeg -f v4l2 -framerate 25 -video_size 640x480 -i /dev/video0 -c:v libx264 -ar 44100 -ac 2 -f flv rtmp://localhost/myapp/camera;
+            #exec ffmpeg -re -i /var/videos/test.mp4 -c:v libx264 -ar 44100 -ac 2 -f flv rtmp://localhost/myapp/camera;
+
+            hls on;
+            hls_path /tmp/hls;
+            hls_fragment 3;
+            hls_playlist_length 60;
+            deny play all;
+        }
+    }
+}
+
