@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 # bin/detect <build-dir>
-echo 'nginx-buildpack'
+
+echo "------> nginx-buildpack with rtmp"
+
 exit 0
