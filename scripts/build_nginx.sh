@@ -1,5 +1,7 @@
 #!/bin/bash
+
 # Build NGINX and modules on Heroku.
+#
 # This program is designed to run in a web dyno provided by Heroku.
 # We would like to build an NGINX binary for the builpack on the
 # exact machine in which the binary will run.
