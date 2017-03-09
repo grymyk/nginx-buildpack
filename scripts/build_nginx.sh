@@ -46,7 +46,7 @@ git clone $rtmp_nginx_module_url
     ./configure \
         --with-http_ssl_module \
         --add-module=../nginx-rtmp-module \
-        --with-pcre=../pcre-${PCRE_VERSION} \
+        --with-pcre=pcre-${PCRE_VERSION} \
         --prefix=/tmp/nginx \
         --add-module=/${temp_dir}/nginx-${NGINX_VERSION}/headers-more-nginx-module-${HEADERS_MORE_VERSION}
     make install
