@@ -22,23 +22,23 @@ rtmp_nginx_module_url=https://github.com/arut/nginx-rtmp-module.git
 
 temp_dir=$(mktemp -d /tmp/nginx.XXXXXXXXXX)
 
-printf "------> Serving files from /tmp on $PORT\n"
+printf "------> Serving files from /tmp on%s\n" "$PORT"
 cd /tmp
 python -m SimpleHTTPServer $PORT &
 
 cd $temp_dir
-printf "------> Temp dir: $temp_dir\n"
+printf "------> Temp dir: %s" "$temp_dir"
 
-printf "------> Downloading nginx v$NGINX_VERSION url:$nginx_tarball_url\n"
+printf "------> Downloading nginx v%s url: %s\n" "$NGINX_VERSION" "$nginx_tarball_url"
 curl -L $nginx_tarball_url | tar xzv
 
-printf "------> Downloading pcre v$PCRE_VERSION url:$pcre_tarball_url\n"
+printf "------> Downloading pcre v%s url: %s\n" "$PCRE_VERSION" "$pcre_tarball_url"
 (cd nginx-${NGINX_VERSION} && curl -L $pcre_tarball_url | tar xvj )
 
-printf "------> Downloading heagers_more v$HEADERS_MORE_VERSION url:$headers_more_nginx_module_url\n"
+printf "------> Downloading heagers_more v%s url: %s\n" "$HEADERS_MORE_VERSION" "$headers_more_nginx_module_url"
 (cd nginx-${NGINX_VERSION} && curl -L $headers_more_nginx_module_url | tar xvz )
 
-printf "------> Downloading $rtmp_nginx_modile_url\n"
+printf "------> Downloading url: %s\n" "$rtmp_nginx_modile_url"
 git clone $rtmp_nginx_module_url
 
 (
@@ -56,5 +56,5 @@ while true
 do
 	sleep 1
 
-	printf ".\n"
+	printf " . \n"
 done
