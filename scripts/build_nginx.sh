@@ -11,12 +11,12 @@
 # Once the dyno has is 'up' you can open your browser and navigate
 # this dyno's directory structure to download the nginx binary.
 
-NGINX_VERSION=${NGINX_VERSION-1.10.2}
-PCRE_VERSION=${PCRE_VERSION-8.21}
-HEADERS_MORE_VERSION=${HEADERS_MORE_VERSION-0.23}
+NGINX_VERSION=${NGINX_VERSION-1.10.3}
+PCRE_VERSION=${PCRE_VERSION-8.40}
+HEADERS_MORE_VERSION=${HEADERS_MORE_VERSION-0.32}
 
 nginx_tarball_url=http://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz
-pcre_tarball_url=http://garr.dl.sourceforge.net/project/pcre/pcre/${PCRE_VERSION}/pcre-${PCRE_VERSION}.tar.bz2
+pcre_tarball_url=ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre-${PCRE_VERSION}.tar.gz
 headers_more_nginx_module_url=https://github.com/agentzh/headers-more-nginx-module/archive/v${HEADERS_MORE_VERSION}.tar.gz
 rtmp_nginx_module_url=https://github.com/arut/nginx-rtmp-module.git
 
@@ -33,7 +33,7 @@ printf " Downloading nginx v%s url: %s\n" "$NGINX_VERSION" "$nginx_tarball_url"
 curl -L $nginx_tarball_url | tar xzv
 
 printf " Downloading pcre v%s url: %s\n" "$PCRE_VERSION" "$pcre_tarball_url"
-(cd nginx-${NGINX_VERSION} && curl -L $pcre_tarball_url | tar xvj )
+(cd nginx-${NGINX_VERSION} && wget $pcre_tarball_url | tar -zxf )
 
 printf " Downloading heagers_more v%s url: %s\n" "$HEADERS_MORE_VERSION" "$headers_more_nginx_module_url"
 (cd nginx-${NGINX_VERSION} && curl -L $headers_more_nginx_module_url | tar xvz )
@@ -46,7 +46,7 @@ git clone $rtmp_nginx_module_url
     ./configure \
         --with-http_ssl_module \
         --add-module=../nginx-rtmp-module \
-        --with-pcre=pcre-${PCRE_VERSION} \
+        --with-pcre=../pcre-${PCRE_VERSION} \
         --prefix=/tmp/nginx \
         --add-module=/${temp_dir}/nginx-${NGINX_VERSION}/headers-more-nginx-module-${HEADERS_MORE_VERSION}
     make install
