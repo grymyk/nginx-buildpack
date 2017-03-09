@@ -33,7 +33,7 @@ printf " Downloading nginx v%s url: %s\n" "$NGINX_VERSION" "$nginx_tarball_url"
 curl -L $nginx_tarball_url | tar xzv
 
 printf " Downloading pcre v%s url: %s\n" "$PCRE_VERSION" "$pcre_tarball_url"
-wget $pcre_tarball_url | tar -zxf
+(cd nginx-${NGINX_VERSION} && wget $pcre_tarball_url | tar -zxf )
 
 printf " Downloading heagers_more v%s url: %s\n" "$HEADERS_MORE_VERSION" "$headers_more_nginx_module_url"
 (cd nginx-${NGINX_VERSION} && curl -L $headers_more_nginx_module_url | tar xvz )
